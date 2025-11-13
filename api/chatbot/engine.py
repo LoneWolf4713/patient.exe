@@ -33,7 +33,7 @@ import os
 load_dotenv()
 apiKey = os.getenv("GEMINI_API_KEY")
 
-kvURL = os.getenv("KV_URL")
+kvURL = os.getenv("REDIS_URL")
 checkpointer = None
 
 if kvURL:
