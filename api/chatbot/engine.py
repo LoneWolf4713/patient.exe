@@ -34,6 +34,9 @@ load_dotenv()
 apiKey = os.getenv("GEMINI_API_KEY")
 
 kvURL = os.getenv("REDIS_URL")
+print("DEBUG: apiKey =", os.getenv("GEMINI_API_KEY"))
+print("DEBUG: redis URL =", os.getenv("REDIS_URL"))
+
 checkpointer = None
 
 if kvURL:

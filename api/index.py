@@ -2,7 +2,14 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 # from fastapi.middleware.cors import CORSMiddleware;
 from fastapi.responses import StreamingResponse
+
+print("DEBUG: apiKey =", os.getenv("GEMINI_API_KEY"))
+print("DEBUG: redis URL =", os.getenv("REDIS_URL"))
+
+
 from api.chatbot.engine import getChatbotResponse
+
+import os
 
 
 class incomingMessage(BaseModel):
