@@ -19,7 +19,7 @@ import Footer from "./components/Footer";
 // import RainBackground from "./components/StarRainBackground";
 import FeaturesFloating from "./components/FeaturesFloating";
 // import StarRainBackground from "./components/StarRainBackground";
-import Noise from "./components/Noise";
+// import Noise from "./components/Noise";
 
 import { v4 as uuidv4 } from 'uuid';
 
