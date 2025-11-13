@@ -1,5 +1,8 @@
 # A chatbot that will act as a patient taking presciption from a doctor
+async def getChatbotResponse(message, sessionId):
+    yield "Server is not configured. Missing API key or Redis."
 
+    
 # Some Imports
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
