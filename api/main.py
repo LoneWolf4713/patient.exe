@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 # from fastapi.middleware.cors import CORSMiddleware;
 from fastapi.responses import StreamingResponse
-from chatbot.engine import getChatbotResponse
+from api.chatbot.engine import getChatbotResponse
 
 
 class incomingMessage(BaseModel):
