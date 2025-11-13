@@ -51,6 +51,7 @@ else:
 
 
 if apiKey and checkpointer:
+    print("Both API Keys Loaded Nicely")
     model = ChatGoogleGenerativeAI(model = "gemini-2.5-flash-lite", temperature = 0.7, google_api_key = apiKey)
 
     # The Clipboard
