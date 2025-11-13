@@ -2,7 +2,7 @@
 async def getChatbotResponse(message, sessionId):
     yield "Server is not configured. Missing API key or Redis."
 
-    
+
 # Some Imports
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, BaseMessage
@@ -36,7 +36,7 @@ import os
 load_dotenv()
 apiKey = os.getenv("GEMINI_API_KEY")
 
-kvURL = os.getenv("REDIS_URL")
+kvURL = os.environ.get('REDIS_URL')
 print("DEBUG: apiKey =", os.getenv("GEMINI_API_KEY"))
 print("DEBUG: redis URL =", os.getenv("REDIS_URL"))
 
