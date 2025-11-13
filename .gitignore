@@ -1,0 +1,14 @@
+Node.js
+node_modules/
+dist/
+.env
+.env*.local
+
+# Python
+venv/
+*.pyc
+__pycache__/
+
+# OS / Editor
+.DS_Store
+.vscode/

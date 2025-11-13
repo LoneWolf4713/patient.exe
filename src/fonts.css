@@ -1,0 +1,130 @@
+@font-face {
+  font-family: "mono45";
+  src: url("./assets/fonts/Mono45Headline-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "mono45";
+  src: url("./assets/fonts/Mono45Headline-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "minimo";
+  src: url("./assets/fonts/minimo-Regular.ttf") format("woff2");
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "grotesk";
+  src: url("./assets/fonts/neuehaasgrottext-55roman-trial.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "grotesk";
+  src: url("./assets/fonts/neuehaasgrottext-65medium-trial.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "grotesk";
+  src: url("./assets/fonts/neuehaasgrottext-75bold-trial.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: "editorial";
+  src: url("./assets/fonts/PPEditorialNew-Regular-BF644b214ff145f.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: "editorial";
+  src: url("./assets/fonts/PPEditorialNew-Italic-BF644b214fb0c0a.otf") format("opentype");
+  font-weight: 500;
+  font-style: italic;
+}
+@font-face {
+  font-family: "editorial";
+  src: url("./assets/fonts/PPEditorialNew-Ultralight-BF644b21500d0c0.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "editorial";
+  src: url("./assets/fonts/PPEditorialNew-UltralightItalic-BF644b214ff1e9b.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic
+}
+@font-face {
+  font-family: "editorial";
+  src: url("./assets/fonts/PPEditorialNew-Ultrabold-BF644b21500840c.otf") format("opentype");
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: "editorial";
+  src: url("./assets/fonts/PPEditorialNew-UltraboldItalic-BF644b214faef01.otf") format("opentype");
+  font-weight: 600;
+  font-style: italic;
+}
+
+
+
+::-webkit-scrollbar-thumb{
+  width: 5px;
+  color: black;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-button{
+  display: none
+}
+
+
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  transform: translateZ(0); 
+
+}
+
+.grain-overlay::before {
+  content: "";
+  position: fixed;
+  top: -10rem;
+  left: -10rem;
+  width: calc(100% + 20rem);
+  height: calc(100% + 20rem);
+
+  background-image: url("https://upload.wikimedia.org/wikipedia/commons/5/5c/Image_gaussian_noise_example.png");
+  background-size: cover;
+  opacity: 0.05;
+
+  pointer-events: none;
+  animation: grainNoise 2s steps(2) infinite;
+}
+
+@keyframes grainNoise {
+  0%   { transform: translate3d(0, 9rem, 0); }
+  10%  { transform: translate3d(-1rem, -4rem, 0); }
+  20%  { transform: translate3d(-8rem, 2rem, 0); }
+  30%  { transform: translate3d(9rem, -9rem, 0); }
+  40%  { transform: translate3d(-2rem, 7rem, 0); }
+  50%  { transform: translate3d(-9rem, -4rem, 0); }
+  60%  { transform: translate3d(2rem, 6rem, 0); }
+  70%  { transform: translate3d(7rem, -8rem, 0); }
+  80%  { transform: translate3d(-9rem, 1rem, 0); }
+  90%  { transform: translate3d(6rem, -5rem, 0); }
+  100% { transform: translate3d(-7rem, 0, 0); }
+}
