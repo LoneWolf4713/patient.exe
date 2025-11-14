@@ -61,7 +61,7 @@ else:
 
 if apiKey and checkpointer:
     print("Both API Keys Loaded Nicely")
-    model = ChatGoogleGenerativeAI(model = "gemini-2.5-flash-lite", temperature = 0.7, google_api_key = apiKey)
+    model = ChatGoogleGenerativeAI(model = "gemini-2.5-flash-lite", temperature = 1.0, google_api_key = apiKey)
 
     # The Clipboard
     class patientState(TypedDict):
@@ -87,7 +87,16 @@ if apiKey and checkpointer:
         
 
     def initializePersona(state: patientState):
-        response = json.loads(model.invoke("You are a medical simulator. Generate a common, non-critical disease, a list of 3 progressive symptoms, and a brief one sentence persona for the patient (anxious, stoic, dramatic). Format as a JSON Object with keys: 'disease', 'symptoms' and 'persona'. DONOT OUTPUT IN MARKDOWN, ONLY JSON").content)
+        response = json.loads(model.invoke("""You are a medical simulator.
+                                            Generate a realistic but varied non-critical condition can range from mild allergies to digestive issues to viral infections to muscular issues to dermatological issues to stress related issues,
+                                            Geneate a list of 3 progressive symptoms that increase in severity or clarity and must not repeat frequently used symptom sets, 
+                                            Generate a one-sentence patient persona with emotional style AND Communication quirks
+                                           Format as a JSON Object with keys: 'disease', 'symptoms' and 'persona'.
+
+                                           Make the disease and diverse as diverse as possible
+
+                                            Return ONLY JSON:
+                                            { "disease": "", "symptoms": [], "persona": "" }""").content)
         return {
             "patientPersona": response["persona"],
             "disease": response["disease"],
@@ -290,8 +299,7 @@ if apiKey and checkpointer:
                 print(response.content)
                 if isinstance(response, AIMessage):
                     print("hai bhai instance")
-                    for word in response.content.split():
-                        yield word + " "
+                    yield response.content
                         
                     
 
