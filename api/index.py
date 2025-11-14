@@ -4,8 +4,7 @@ from pydantic import BaseModel
 from fastapi.responses import StreamingResponse
 
 import os
-print("DEBUG: apiKey =", os.getenv("GEMINI_API_KEY"))
-print("DEBUG: redis URL =", os.getenv("REDIS_URL"))
+
 
 
 from api.chatbot.engine import getChatbotResponse

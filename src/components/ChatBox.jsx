@@ -43,7 +43,7 @@ function ChatBox({ messages, setMessages, sessionId,initialMessage }) {
       ...prev, userMessage, {text:"", isUser: false}
     ]);
 
-    const response = await fetch("/api/index", {
+    const response = await fetch("/api/index/getResponse", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
