@@ -87,7 +87,7 @@ if apiKey and checkpointer:
         
 
     def initializePersona(state: patientState):
-        response = json.loads(model.invoke("""You are a medical simulator.
+        response = model.invoke("""You are a medical simulator.
                                             Generate a realistic but varied non-critical condition can range from mild allergies to digestive issues to viral infections to muscular issues to dermatological issues to stress related issues,
                                             Geneate a list of 3 progressive symptoms that increase in severity or clarity and must not repeat frequently used symptom sets, 
                                             Generate a one-sentence patient persona with emotional style AND Communication quirks
@@ -95,9 +95,10 @@ if apiKey and checkpointer:
 
                                            Make the disease and diverse as diverse as possible
 
-                                            Return ONLY JSON:
-                                            { "disease": "", "symptoms": [], "persona": "" }""").content)
+                                            Return ONLY JSON, NO MARKDOWN:
+                                            { "disease": "", "symptoms": [], "persona": "" }""").content
         print(response)
+        response = json.loads(response)
         return {
             "patientPersona": response["persona"],
             "disease": response["disease"],
