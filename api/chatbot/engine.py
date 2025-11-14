@@ -22,7 +22,7 @@ from redis import Redis
 
 # LangGraph Imports:
 from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.redis import AsyncRedisSaver
+from langgraph.checkpoint.redis import RedisSaver
 
 # Tool Inputs
 import pydantic
@@ -40,73 +40,26 @@ kvURL = os.environ.get('REDIS_URL')
 print("DEBUG: apiKey =", os.getenv("GEMINI_API_KEY"))
 print("DEBUG: redis URL =", os.getenv("REDIS_URL"))
 
-graph = None
 checkpointer = None
-initialized = False
 
-async def init():
-    global checkpointer, graph, initialized;
-    if initialized:
-        return
-    
-    print("Initializing Redis + LangGraph")
-    if kvURL:
-        print("Vercel KV URL Found. Using RedisSaver")
-        try:
-            redisClient = Redis.from_url(kvURL)
-            print("PING:", redisClient.ping())  
-            checkpointer = AsyncRedisSaver(redis_client=redisClient)
-            await checkpointer.setup()
+if kvURL:
+    print("Vercel KV URL Found. Using RedisSaver")
+    try:
+        redisClient = Redis.from_url(kvURL)
+        print("PING:", redisClient.ping())  
+        checkpointer = RedisSaver(redis_client=redisClient)
+        checkpointer.setup()
 
-
-
-            workflow = StateGraph(patientState)
-
-            workflow.add_node("initializePersona", initializePersona)
-            workflow.add_node("evaluateUserInput", evaluateUserInput_Node)
-            workflow.add_node("evaluateLLMResponse", evaluateLLMResponse)
-            workflow.add_node("generatePatientResponses", generatePatientResponses)
-            workflow.add_node("acceptTreatment", acceptTreatment)
-
-            workflow.set_conditional_entry_point(
-                routeInitialMessage,
-                {
-            "initialize": "initializePersona",
-            "continue": "evaluateUserInput"
-            }
-            )
-
-            workflow.add_edge("initializePersona", "evaluateUserInput")
-            workflow.add_edge("generatePatientResponses", "evaluateLLMResponse")
-            workflow.add_edge("evaluateLLMResponse", END)
-
-            workflow.add_edge("acceptTreatment", END)
-
-            workflow.add_conditional_edges(
-            "evaluateUserInput",
-            evaluateUserInput_condition,
-            {
-                "questioning": "generatePatientResponses",
-                "prescribingTreatment": "acceptTreatment"
-            }
-        )
-                
-    
-
-            graph = workflow.compile(checkpointer=checkpointer)
-            initialized = True
-            print("Initialization complete.")
-            
-
-        except Exception as e:
-            print(f"Error Connecting To Redis: {e}")
-        else:
-            print("Couldn't Get Vercel KV URL, Can't Procede")
+    except Exception as e:
+        print(f"Error Connecting To Redis: {e}")
+else:
+    print("Couldn't Get Vercel KV URL, Can't Procede")
+    apiKey = None
 
 
 
 
-if apiKey:
+if apiKey and checkpointer:
     print("Both API Keys Loaded Nicely")
     model = ChatGoogleGenerativeAI(model = "gemini-2.5-flash-lite", temperature = 0.7, google_api_key = apiKey)
 
@@ -277,22 +230,49 @@ if apiKey:
 
     # LangGraph Code
 
+    workflow = StateGraph(patientState)
 
+    workflow.add_node("initializePersona", initializePersona)
+    workflow.add_node("evaluateUserInput", evaluateUserInput_Node)
+    workflow.add_node("evaluateLLMResponse", evaluateLLMResponse)
+    workflow.add_node("generatePatientResponses", generatePatientResponses)
+    workflow.add_node("acceptTreatment", acceptTreatment)
+
+    workflow.set_conditional_entry_point(
+        routeInitialMessage,
+        {
+       "initialize": "initializePersona",
+       "continue": "evaluateUserInput"
+    }
+    )
+
+    workflow.add_edge("initializePersona", "evaluateUserInput")
+    workflow.add_edge("generatePatientResponses", "evaluateLLMResponse")
+    workflow.add_edge("evaluateLLMResponse", END)
+
+    workflow.add_edge("acceptTreatment", END)
+
+    workflow.add_conditional_edges(
+    "evaluateUserInput",
+    evaluateUserInput_condition,
+    {
+        "questioning": "generatePatientResponses",
+        "prescribingTreatment": "acceptTreatment"
+    }
+)
+    
+
+    graph = workflow.compile(checkpointer=checkpointer)
 
 
     
 
     print("Chatbot is ready. Type 'exit' to quit.")
     
-    async def getChatbotResponse(message, sessionId):
-        global graph
-    
-        if not initialized:
-            await init()
-
+    def getChatbotResponse(message, sessionId):
         print("Message and Session ID: ", message,sessionId )
         config = {"configurable": {"thread_id": sessionId}}
-        async for event in graph.astream({
+        for event in graph.astream({
             "chatHistory": [HumanMessage(content=message)]
         }, config):
             print("event: ", event)
@@ -312,7 +292,7 @@ if apiKey:
                     print("hai bhai instance")
                     for word in response.content.split():
                         yield word
-                        await asyncio.sleep(0.1) 
+                        
                     
 
     
