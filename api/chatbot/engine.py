@@ -96,8 +96,20 @@ if apiKey and checkpointer:
                                            Make the disease and diverse as diverse as possible
 
                                             Return ONLY JSON, NO MARKDOWN:
-                                            { "disease": "", "symptoms": [], "persona": "" }""").content
+                                            { "disease": "", "symptoms": [], "persona": "" }""").content.strip()
         print(response)
+        if response.startswith("```"):
+            response = response.strip("`")
+            response = response.replace("json", "").strip()
+        
+        import re
+        match = re.search(r"\{.*\}", response, re.DOTALL)
+        if not match:
+            print("Model, didn't return JSON")
+
+        response =match.group(0)
+
+        
         response = json.loads(response)
         return {
             "patientPersona": response["persona"],
