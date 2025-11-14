@@ -46,6 +46,7 @@ if kvURL:
     print("Vercel KV URL Found. Using RedisSaver")
     try:
         redisClient = redis.from_url(kvURL)
+        print("PING:", redisClient.ping())  
         checkpointer = RedisSaver(redisClient)
     except Exception as e:
         print(f"Error Connecting To Redis: {e}")
