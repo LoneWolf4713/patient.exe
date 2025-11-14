@@ -272,7 +272,7 @@ if apiKey and checkpointer:
     def getChatbotResponse(message, sessionId):
         print("Message and Session ID: ", message,sessionId )
         config = {"configurable": {"thread_id": sessionId}}
-        for event in graph.astream({
+        for event in graph.stream({
             "chatHistory": [HumanMessage(content=message)]
         }, config):
             print("event: ", event)
