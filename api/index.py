@@ -39,7 +39,7 @@ async def root(item:  incomingMessage):
 
 
 from fastapi import Request
-@app.post("/debug")
+@app.post("/api")
 async def debug(request: Request):
     body = await request.json()
     print("Raw body:", body)
