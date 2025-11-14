@@ -1,5 +1,5 @@
 # A chatbot that will act as a patient taking presciption from a doctor
-async def getChatbotResponse(message, sessionId):
+def getChatbotResponse(message, sessionId):
     yield "Server is not configured. Missing API key or Redis."
 
 
