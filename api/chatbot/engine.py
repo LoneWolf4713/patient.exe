@@ -291,7 +291,7 @@ if apiKey and checkpointer:
                 if isinstance(response, AIMessage):
                     print("hai bhai instance")
                     for word in response.content.split():
-                        yield word
+                        yield word + " "
                         
                     
 
