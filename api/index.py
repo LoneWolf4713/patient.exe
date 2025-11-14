@@ -27,7 +27,7 @@ app=FastAPI()
 # )
 
 
-@app.post("/getResponse")
+@app.post("/")
 async def root(item:  incomingMessage):
     message = item.message
     sessionId = item.sessionId
