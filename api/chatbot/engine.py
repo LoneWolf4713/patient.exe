@@ -18,7 +18,7 @@ import operator
 import json
 
 import asyncio
-import redis
+from redis import Redis
 
 # LangGraph Imports:
 from langgraph.graph import StateGraph, END
@@ -45,9 +45,11 @@ checkpointer = None
 if kvURL:
     print("Vercel KV URL Found. Using RedisSaver")
     try:
-        redisClient = redis.from_url(kvURL)
+        redisClient = Redis.from_url(kvURL)
         print("PING:", redisClient.ping())  
-        checkpointer = RedisSaver(redisClient)
+        checkpointer = RedisSaver(redis_client=redisClient)
+        checkpointer.setup()
+
     except Exception as e:
         print(f"Error Connecting To Redis: {e}")
 else:
