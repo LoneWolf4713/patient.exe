@@ -27,10 +27,11 @@ app=FastAPI()
 # )
 
 
-@app.post("/")
+@app.post("/api")
 async def root(item:  incomingMessage):
     message = item.message
     sessionId = item.sessionId
+    print(sessionId)
     tokenGenerator = getChatbotResponse(message, sessionId)
     return StreamingResponse(tokenGenerator, media_type="text/plain")
 
@@ -39,7 +40,7 @@ async def root(item:  incomingMessage):
 
 
 from fastapi import Request
-@app.post("/api")
+@app.post("/debug")
 async def debug(request: Request):
     body = await request.json()
     print("Raw body:", body)
