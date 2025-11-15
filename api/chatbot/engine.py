@@ -62,7 +62,8 @@ else:
 
 if apiKey and checkpointer:
     print("Both API Keys Loaded Nicely")
-    model = ChatGoogleGenerativeAI(model = "gemini-2.5-flash-lite", temperature = 1.2, google_api_key = apiKey)
+    model = ChatGoogleGenerativeAI(model = "gemini-2.5-flash-lite",  top_p=0.95,
+    top_k=50, temperature = 1.4, google_api_key = apiKey)
 
     # The Clipboard
     class patientState(TypedDict):
@@ -90,7 +91,7 @@ if apiKey and checkpointer:
     def initializePersona(state: patientState):
         random_tag = str(os.urandom(8).hex())
         response = model.invoke(f"""
-                                RANDOM_TAG={random_tag}
+                                
                                 You are a medical simulator.
                                             Generate a realistic but varied non-critical condition can range from mild allergies to digestive issues to viral infections to muscular issues to dermatological issues to stress related issues,
                                             Geneate a list of 3 progressive symptoms that increase in severity or clarity and must not repeat frequently used symptom sets, 
@@ -116,14 +117,18 @@ if apiKey and checkpointer:
         response =match.group(0)
 
         
-        response = json.loads(response)
-        return {
-            "patientPersona": response["persona"],
-            "disease": response["disease"],
-            "symptoms": response["symptoms"],
-            "symptomsRemaining": response["symptoms"],
-            "symptomsRevealed": []
-        }
+        try:
+            response = json.loads(response)
+            return {
+                "patientPersona": response["persona"],
+                "disease": response["disease"],
+                "symptoms": response["symptoms"],
+                "symptomsRemaining": response["symptoms"],
+                "symptomsRevealed": []
+            }
+        except Exception:
+            print("error occured")
+
     
     def generatePatientResponses(state: patientState):
         patientPrompt = ChatPromptTemplate.from_messages([
