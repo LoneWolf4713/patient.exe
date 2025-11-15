@@ -91,7 +91,7 @@ if apiKey and checkpointer:
     def initializePersona(state: patientState):
         random_tag = str(os.urandom(8).hex())
         response = model.invoke(f"""
-                                
+                                RANDOM TAG: {random_tag}
                                 You are a medical simulator.
                                             Generate a realistic but varied non-critical condition can range from mild allergies to digestive issues to viral infections to muscular issues to dermatological issues to stress related issues,
                                             Geneate a list of 3 progressive symptoms that increase in severity or clarity and must not repeat frequently used symptom sets, 
@@ -101,7 +101,7 @@ if apiKey and checkpointer:
                                            Make the disease and diverse as diverse as possible
 
                                             Return ONLY JSON, NO MARKDOWN:
-                                            { "disease": "", "symptoms": [], "persona": "" }""").content.strip()
+                                            {{ "disease": "", "symptoms": [], "persona": "" }}""").content.strip()
         print(response,flush=True)
         print(response,file=sys.stderr)
         if response.startswith("```"):
