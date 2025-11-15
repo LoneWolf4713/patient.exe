@@ -101,7 +101,7 @@ if apiKey and checkpointer:
 
                                             Return ONLY JSON, NO MARKDOWN:
                                             { "disease": "", "symptoms": [], "persona": "" }""").content.strip()
-        print(response)
+        print(response,flush=True)
         print(response,file=sys.stderr)
         if response.startswith("```"):
             response = response.strip("`")
@@ -110,7 +110,7 @@ if apiKey and checkpointer:
         import re
         match = re.search(r"\{.*\}", response, re.DOTALL)
         if not match:
-            print("Model, didn't return JSON")
+            print("Model, didn't return JSON",flush=True)
             print("Model, didn't return JSON",file=sys.stderr)
 
         response =match.group(0)
