@@ -33,6 +33,7 @@ from typing import Literal
 # Trying to import the Gemini API Key
 from dotenv import load_dotenv
 import os
+import sys
 load_dotenv()
 apiKey = os.getenv("GEMINI_API_KEY")
 
@@ -101,6 +102,7 @@ if apiKey and checkpointer:
                                             Return ONLY JSON, NO MARKDOWN:
                                             { "disease": "", "symptoms": [], "persona": "" }""").content.strip()
         print(response)
+        print(response,file=sys.stderr)
         if response.startswith("```"):
             response = response.strip("`")
             response = response.replace("json", "").strip()
@@ -109,6 +111,7 @@ if apiKey and checkpointer:
         match = re.search(r"\{.*\}", response, re.DOTALL)
         if not match:
             print("Model, didn't return JSON")
+            print("Model, didn't return JSON",file=sys.stderr)
 
         response =match.group(0)
 
