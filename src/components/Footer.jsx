@@ -12,8 +12,8 @@ function Footer(){
                 built by <MotionLink href="https://www.linkedin.com/in/prtyksh/" target="_blank" display="inline-block"  whileHover={{letterSpacing: "1px"}} >
                     prtyksh<sup>↗</sup>
                 </MotionLink>
-                 | 
-                <MotionLink href="/">Restart Chat</MotionLink>
+                <br/>
+                <MotionLink href="/">Restart Chat<sup>↗</sup></MotionLink>
             </MotionText>
         </Box>
     )
