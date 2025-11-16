@@ -1,7 +1,4 @@
 # A chatbot that will act as a patient taking presciption from a doctor
-def getChatbotResponse(message, sessionId):
-    yield "Server is not configured. Missing API key or Redis."
-
 
 # Some Imports
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -16,71 +13,100 @@ from typing import List, Annotated
 from typing_extensions import TypedDict
 import operator
 import json
-
-import asyncio
-from redis import Redis
+import re
 
 # LangGraph Imports:
 from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.redis import RedisSaver
+from redis import Redis
 
 # Tool Inputs
 import pydantic
 from pydantic import BaseModel, Field
 from typing import Literal
 
+# Logging Imports
+import logging
 
-# Trying to import the Gemini API Key
-from dotenv import load_dotenv
+# Env Variable Imports
 import os
 import sys
+from dotenv import load_dotenv
+
+# Logging Setup
+logging.basicConfig(
+    filename="logs.txt",
+    encoding="utf-8",
+    filemode="w",
+    format="{asctime} - {levelname} : {message}",
+    style="{",
+    datefmt="%Y-%m-%d %H:%M",
+    level=logging.DEBUG,
+    force=True
+)
+logging.info("Engine Module Called and Started")
+
+# Trying to import the Gemini API Key and The Redis URL
 load_dotenv()
 apiKey = os.getenv("GEMINI_API_KEY")
+redisURL = os.getenv('REDIS_URL')
 
-kvURL = os.environ.get('REDIS_URL')
-print("DEBUG: apiKey =", os.getenv("GEMINI_API_KEY"))
-print("DEBUG: redis URL =", os.getenv("REDIS_URL"))
 
+# Global Variable to Better Handle Chatbot Readyness
+CHATBOT_READY = False
+
+# Verifying Presence of Gemini API KEY
+if  apiKey:
+    logging.info("Gemini API Key Loaded")
+else:
+    logging.debug("Gemini API Key NOT Found")
+
+# Making the Redis Checkpointer 
 checkpointer = None
-
-if kvURL:
-    print("Vercel KV URL Found. Using RedisSaver")
+if redisURL:
+    logging.info("Redis URL Env Var Loaded, Trying checkpointer now...")
     try:
-        redisClient = Redis.from_url(kvURL)
-        print("PING:", redisClient.ping())  
+        redisClient = Redis.from_url(redisURL)
         checkpointer = RedisSaver(redis_client=redisClient)
         checkpointer.setup()
+        logging.info("Redis Checkpointer Setup and Ready")
 
     except Exception as e:
-        print(f"Error Connecting To Redis: {e}")
+        logging.debug(f"Error Establishing Redis Checkpointer: {e}")
+
 else:
-    print("Couldn't Get Vercel KV URL, Can't Procede")
-    apiKey = None
-
-
+    logging.debug("Couldn't Find Redis URL")
 
 
 if apiKey and checkpointer:
-    print("Both API Keys Loaded Nicely")
-    model = ChatGoogleGenerativeAI(model = "gemini-2.5-flash-lite",  top_p=0.95,
-    top_k=50, temperature = 1.4, google_api_key = apiKey)
+    CHATBOT_READY = True
+    logging.info("Chatbot Ready")
+else:
+    logging.debug("Chatbot Not Ready")
 
+
+if CHATBOT_READY:
+    model = ChatGoogleGenerativeAI(model = "gemini-2.5-flash-lite",  top_p=0.95,
+    top_k=40, temperature = 1.0, google_api_key = apiKey)
+    
     # The Clipboard
     class patientState(TypedDict):
         patientPersona: str         # To give some personality
         disease: str                # particular disease our AI will have
         symptoms: list[str]         # list of three symptoms
 
-        symptomsRevealed: list[str]
-        symptomsRemaining: list[str]
+        symptomsRevealed: list[str] # Added these variables to implement
+        symptomsRemaining: list[str] # Progressive Symptom Reveal
 
         chatHistory: Annotated[list, operator.add]
-        
-        prescribedTreatment: str
-
+    
         last_classification: str
 
     def routeInitialMessage(state: patientState):
+        """
+        This node decides whether the user is a new one or a previously talked one
+        and routes the graph based on that.
+        """
 
         if "patientPersona" not in state or state["patientPersona"] is None:
             return "initialize"
@@ -89,34 +115,41 @@ if apiKey and checkpointer:
         
 
     def initializePersona(state: patientState):
-        random_tag = str(os.urandom(8).hex())
+        """
+        This ndoe initializes the Persona, Disease and Symptoms of the chatbot on each run.
+        On each run, a new, dynamic and unique persona, disease and symptoms are generated
+        so the chatbot doesn't feel repetitive.
+
+        Also added a randomTag to make sure the AI Returns different outputs on each run,
+        because previously it was returning the same and same personas ignoring the prompt,
+        (maybe caching?).
+        The randomTag helps keeping the novelty of the prompt.
+
+        """
+        randomTag = str(os.urandom(8).hex())
         response = model.invoke(f"""
-                                RANDOM TAG: {random_tag}
+                                RANDOM TAG: {randomTag}
                                 You are a medical simulator.
                                             Generate a realistic but varied non-critical condition can range from mild allergies to digestive issues to viral infections to muscular issues to dermatological issues to stress related issues,
                                             Geneate a list of 3 progressive symptoms that increase in severity or clarity and must not repeat frequently used symptom sets, 
                                             Generate a one-sentence patient persona with emotional style AND Communication quirks
-                                           Format as a JSON Object with keys: 'disease', 'symptoms' and 'persona'.
+                                            Format as a JSON Object with keys: 'disease', 'symptoms' and 'persona'.
 
-                                           Make the disease and diverse as diverse as possible
+                                            Make the disease and diverse as diverse as possible
 
                                             Return ONLY JSON, NO MARKDOWN:
                                             {{ "disease": "", "symptoms": [], "persona": "" }}""").content.strip()
-        print(response,flush=True)
-        print(response,file=sys.stderr)
+        
+        # model was still returning markdown, so just to make sure. 
         if response.startswith("```"):
             response = response.strip("`")
             response = response.replace("json", "").strip()
         
-        import re
         match = re.search(r"\{.*\}", response, re.DOTALL)
         if not match:
-            print("Model, didn't return JSON",flush=True)
-            print("Model, didn't return JSON",file=sys.stderr)
+            logging.error("Model Didn't Return JSON in Initialize Persona")
 
         response =match.group(0)
-
-        
         try:
             response = json.loads(response)
             return {
@@ -126,11 +159,15 @@ if apiKey and checkpointer:
                 "symptomsRemaining": response["symptoms"],
                 "symptomsRevealed": []
             }
-        except Exception:
-            print("error occured")
+        except Exception as e:
+            logging.error(f"Error While Parsing :InitializePersona Output: {e}")
+            logging.error(f"Model's Response Was: {response}")
 
     
     def generatePatientResponses(state: patientState):
+        """
+        This is the main node that generates the AI Response on each message.
+        The prompt gives it's persona, disease and symptoms along with the chatHistory"""
         patientPrompt = ChatPromptTemplate.from_messages([
             SystemMessage(content="""
                 You are {patientPersona}. You have {disease}. Your Symptoms are {symptoms}.
@@ -149,7 +186,10 @@ if apiKey and checkpointer:
             state
         )
 
-        return {"chatHistory": [response]}
+        # Adding Truncating History to last 5 messages.
+        updatedHistory = state["chatHistory"] + [response]
+
+        return {"chatHistory": updatedHistory[-5:]}
 
 
 
@@ -158,7 +198,6 @@ if apiKey and checkpointer:
     # so now our LLM model will do the job for us
 
     class ClassifyInput(BaseModel):
-
         classification: Literal["questioning", "prescribingTreatment"] = Field(
             description = "The classification of the user's last message"
         )
@@ -169,6 +208,13 @@ if apiKey and checkpointer:
     )
 
     def evaluateUserInput_Node(state: patientState):
+
+        """
+        This node evaluates the user (Doctor's) input to decide whether the doctor is giving
+        a prescription or whether he's asking more info about the disease.
+
+        Tried to implement manually but this is a much better way.
+        """
 
         lastUserMessage = state["chatHistory"][-1].content
         
@@ -203,6 +249,12 @@ if apiKey and checkpointer:
     )
 
     def evaluateLLMResponse(state: patientState):
+
+        """
+        This node's job is to analyze the AI Output to see which symptoms it has revealed and mark those as such.
+        Why? because LLM Reveals the symptoms in a conversation flow, so it is very hard to detect the revealed symptoms manually.
+        Hence this node uses the LLM to classify it's own output.
+        """
         lastMessage = state["chatHistory"][-1].content
 
         remainingSymptoms = state["symptomsRemaining"]
@@ -245,6 +297,10 @@ if apiKey and checkpointer:
 
 
     def acceptTreatment(state: patientState):
+        """
+        This node is simple, when a prescription has been given, it directs the LLM to generate a 
+        response corresponding to Doctor's Last Message.
+        """
         lastUserMessage = state["chatHistory"][-1].content
         acceptTreatmentPrompt = ChatPromptTemplate.from_messages([
             SystemMessage(
@@ -294,41 +350,42 @@ if apiKey and checkpointer:
         "prescribingTreatment": "acceptTreatment"
     }
 )
-    
-
     graph = workflow.compile(checkpointer=checkpointer)
 
 
-    
+# This is the main chatbot function that will be imported by the FastAPI
+def getChatbotResponse(message, sessionId):
 
-    print("Chatbot is ready. Type 'exit' to quit.")
+    if not CHATBOT_READY:
+        yield "Internal Server Error: 500, Please Try Again Later"
+        return
     
-    def getChatbotResponse(message, sessionId):
-        print("Message and Session ID: ", message,sessionId )
+    if len(message) > 300:
+        yield "Message too long. Please send a shorter message."
+        logging.debug(f"Message Length Was More Than 300 Chars, sessionId: { sessionId} ")
+        return
+    
+    try:
+        logging.info(f"Message Received, Sesssion ID: { sessionId}")
+
         config = {"configurable": {"thread_id": sessionId}}
         for event in graph.stream({
             "chatHistory": [HumanMessage(content=message)]
         }, config):
-            print("event: ", event)
+            
+            nodeName = next(iter(event))
+            logging.info(f"{sessionId} EVENT: node={nodeName}")
+            nodeOutput = event[nodeName]
 
-            node_name = next(iter(event))
-            node_output = event[node_name]
-
-            if not node_output:
+            if not nodeOutput:
                 continue
 
-
-            if "chatHistory" in node_output:
-                print("chatHistory is in event")
-                response = node_output["chatHistory"][-1]
-                print(response.content)
+            if "chatHistory" in nodeOutput:
+                response = nodeOutput["chatHistory"][-1]
                 if isinstance(response, AIMessage):
-                    print("hai bhai instance")
                     yield response.content
-                        
-                    
 
-    
-else:
-    if not apiKey:
-        print("API Key Not Present, Cannot Procede")
+    except Exception as e:
+        logging.debug(f"Error Inside Graph: {e}")
+        yield "Internal Server Error: 500, Please Try Again Later"
+                        
