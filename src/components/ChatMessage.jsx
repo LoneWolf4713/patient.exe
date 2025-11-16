@@ -34,9 +34,8 @@ function ChatMessage({ message, isUser, isStreaming }) {
           {message}
 
           {
-            ( isStreaming &&
-              <TypingIndicator/>
-            )
+             isStreaming && message == "" && <TypingIndicator/>
+            
           }
           
         </MotionText>

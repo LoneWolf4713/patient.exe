@@ -35,7 +35,6 @@ from dotenv import load_dotenv
 
 # Logging Setup
 logging.basicConfig(
-    filename="logs.txt",
     encoding="utf-8",
     filemode="w",
     format="{asctime} - {levelname} : {message}",
