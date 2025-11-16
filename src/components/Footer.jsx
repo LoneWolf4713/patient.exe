@@ -10,7 +10,7 @@ function Footer(){
         <Box as="footer" mt={2}>
             <MotionText  fontWeight="500" fontFamily="editorial" fontSize={20} initial={{opacity: 0, y: 50}} animate={{opacity: 1, y: 0}} transition={{duration: 0.5}} textAlign="center" >
                 built by <MotionLink href="https://www.linkedin.com/in/prtyksh/" target="_blank" display="inline-block"  whileHover={{letterSpacing: "1px"}} >
-                    prtyksh<sup>↗</sup>
+                    prtyksh<sup>↗</sup> | <MotionLink href="/">Restart Chat</MotionLink>
                 </MotionLink>
             </MotionText>
         </Box>
