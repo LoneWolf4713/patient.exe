@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 const MotionBox = motion(Box);
 const MotionText = motion(Text);
-
+import TypingIndicator from "./TypingIndicator";
 
 
 
@@ -20,17 +20,24 @@ function ChatMessage({ message, isUser, isStreaming }) {
         bg={isUser ? "#2F4858" : "#6E4F2F"}
         color="#e5e4dc"
         textAlign={isUser ? "right" : "left"}
-        p={3}
-        py={2}
+        px={3}
+        py={{ base: 1, md: 2 }}
         borderRadius={5}
         fontFamily="grotesk"
         boxShadow="sm"
+        fontSize={{ base: 14, md: 16 }}
       >
         <MotionText
           animate={{ height: "auto" }}
           transition={{ type: "spring", stiffness: 140, damping: 14 }}
         >
           {message}
+
+          {
+            ( isStreaming &&
+              <TypingIndicator/>
+            )
+          }
           
         </MotionText>
       </MotionBox>

@@ -39,11 +39,11 @@ function FeaturesFloating() {
   ];
 
   return (
-    <Wrap as={motion.div} variants={containerVariants} initial="hidden" animate="visible"  justify="center" spacingX={8} spacingY={4} mt={20} width="2xl">
+    <Wrap as={motion.div} variants={containerVariants} initial="hidden" animate="visible"  justify="center" spacingX={8} spacingY={4} mt={20} w={{ base: "100%", md: "2xl" }}>
       {features.map((feature) => (
         <MotionWrapItem whileHover={{scaleX: 1.3, scaleY: 1.1}} key={feature} variants={itemVariants}>
           <Text
-            fontSize={16}
+            fontSize={{ base: 14, md: 16 }}
             opacity={0.8}
             bg="#080808"
             fontWeight={400}

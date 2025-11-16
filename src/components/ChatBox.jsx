@@ -18,6 +18,7 @@ import { useState } from "react";
 
 import { useEffect, useRef } from "react";
 
+import TypingIndicator from "./TypingIndicator";
 function ChatBox({ messages, setMessages, sessionId,initialMessage }) {
   
   const [input, setInput] = useState("");
@@ -55,7 +56,7 @@ function ChatBox({ messages, setMessages, sessionId,initialMessage }) {
    console.log(response.body)
 
     if(!response.body){
-      
+      setMessages(prev => [...prev, {text: "Server error, Please Try Again Later", isUser:false}])
       return
     }
 
@@ -99,7 +100,7 @@ function ChatBox({ messages, setMessages, sessionId,initialMessage }) {
     if (chatBoxContainer) {
       chatBoxContainer.scrollTo({
         top: chatBoxContainer.scrollHeight,
-        behaviour: "smooth",
+        behavior: "smooth",
       });
     }
   }, [messages]);
@@ -121,7 +122,7 @@ function ChatBox({ messages, setMessages, sessionId,initialMessage }) {
       </HStack>
       <Box
         flex={1}
-        w="2xl"
+        w={{ base: "100%", md: "2xl" }}
         overflowY="auto"
         bg="#e5e4dc"
         borderRadius={5}
@@ -146,15 +147,18 @@ function ChatBox({ messages, setMessages, sessionId,initialMessage }) {
       >
         <VStack w="100%" spacing={3} align="stretch" p={4} bg="#e5e4dc">
           <AnimatePresence initial={false}>
+            
             {messages.map((msg, index) => (
               <ChatMessage key={index} message={msg.text} isUser={msg.isUser} isStreaming={isStreaming} />
             ))}
           </AnimatePresence>
+          
         </VStack>
       </Box>
-      <Box bg="#e5e4dc" w="2xl" p={4} mt={6}  borderRadius={5} >
+      <Box bg="#e5e4dc" w={{ base: "100%", md: "2xl" }}  p={4} mt={6}  borderRadius={5} >
       <InputGroup    >
         <Input
+        disabled={isStreaming}
           placeholder="Continue the session..."
           variant="flushed"
           borderColor="gray.800"
@@ -169,6 +173,7 @@ function ChatBox({ messages, setMessages, sessionId,initialMessage }) {
         />
         <InputRightElement>
           <Button
+          disabled={isStreaming}
             size="sm"
             h="100%"
             bg="none"
