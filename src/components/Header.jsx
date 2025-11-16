@@ -15,7 +15,7 @@ function Header() {
       <HStack spacing={4}>
         <Heading
           as="h1"
-          fontSize={{ base: "3xl", md: "5xl" }}
+          fontSize="5xl"
           fontFamily="editorial"
           letterSpacing="-1px"
           fontWeight="700"
