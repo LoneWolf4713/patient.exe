@@ -107,7 +107,7 @@ if CHATBOT_READY:
         and routes the graph based on that.
         """
 
-        if "patientPersona" not in state or state["patientPersona"] is None:
+        if state.get("chatHistory") and isinstance(state["chatHistory"][0], HumanMessage):
             return "initialize"
         else:
             return "continue"
