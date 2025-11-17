@@ -86,7 +86,7 @@ else:
 
 if CHATBOT_READY:
     model = ChatGoogleGenerativeAI(model = "gemini-2.5-flash-lite",  top_p=0.95,
-    top_k=40, temperature = 1.0, google_api_key = apiKey)
+    top_k=50, temperature = 1.2, google_api_key = apiKey)
     
     # The Clipboard
     class patientState(TypedDict):
